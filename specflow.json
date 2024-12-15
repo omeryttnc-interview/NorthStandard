@@ -1,0 +1,13 @@
+﻿{
+    "specFlow": {
+        "runtime": {
+            "dependencyInjection": {
+                "container": "BoDi"
+            },
+            "parallelExecution": {
+                "multiThreaded": true,
+                "syncContext": false
+            }
+        }
+    }
+}

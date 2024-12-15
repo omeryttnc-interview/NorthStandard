@@ -1,0 +1,51 @@
+﻿name: .NET Test Workflow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build the project
+      run: dotnet build --no-restore
+
+    - name: Run tests
+      run: dotnet test --no-build --logger "trx;LogFileName=TestResults.trx"
+
+    - name: Check for TestResults
+      shell: pwsh
+      run: |
+        # Define the working directory
+        $workingDirectory = $env:GITHUB_WORKSPACE
+        Write-Host "Working Directory: $workingDirectory"
+        
+        # Construct the full path to TestResults.trx
+        $testResultsPath = Join-Path $workingDirectory "TestResults\TestResults.trx"
+        Write-Host "Full Path to TestResults.trx: $testResultsPath"
+
+        # Check if the TestResults.trx file exists
+        if (-Not (Test-Path $testResultsPath)) {
+            Write-Error "TestResults.trx not found"
+            exit 1
+        }
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v3
+      with:
+        name: TestResults
+        path: TestResults.trx
